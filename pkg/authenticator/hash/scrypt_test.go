@@ -2,6 +2,7 @@ package hash
 
 import (
 	"crypto/fips140"
+	"errors"
 	"strings"
 	"testing"
 )
@@ -18,7 +19,7 @@ func Test_UnitSCrypt_VerifyHash(t *testing.T) {
 		{
 			name: "Basic Hash Test",
 			args: args{
-				secretKey: "hello world",
+				secretKey: "hello world, hello",
 			},
 		},
 		{
@@ -40,7 +41,7 @@ func Test_UnitSCrypt_VerifyHash(t *testing.T) {
 }
 
 func Test_UnitSCrypt_CreateHash_SaltLength(t *testing.T) {
-	hash, err := NewSCrypt().CreateHash("hello world")
+	hash, err := NewSCrypt().CreateHash("hello world, long enough")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,12 +70,44 @@ func Test_UnitSCrypt_VerifyHash_LegacySaltFIPS(t *testing.T) {
 	if !fips140.Enforced() {
 		t.Skip("requires GODEBUG=fips140=only")
 	}
-	err := NewSCrypt().VerifyHash(legacyHash, "hello world")
+	err := NewSCrypt().VerifyHash(legacyHash, "hello world, long enough")
 	if err == nil {
 		t.Fatal("SCrypt.VerifyHash() error = nil, want an error for an 8-byte salt under fips140=only")
 	}
 	if !strings.Contains(err.Error(), "delete the node password secret") {
 		t.Errorf("SCrypt.VerifyHash() error = %q, want it to name the remedy", err)
+	}
+}
+
+func Test_UnitSCrypt_ShortSecret(t *testing.T) {
+	if !fips140.Enforced() {
+		t.Skip("short secrets are accepted outside fips140=only mode")
+	}
+	hasher := NewSCrypt()
+	valid, err := hasher.CreateHash(strings.Repeat("A", minFIPSSecretLen))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secret := strings.Repeat("A", minFIPSSecretLen-1)
+	if _, err := hasher.CreateHash(secret); !errors.Is(err, errSecretTooShort) {
+		t.Errorf("CreateHash() error = %v, want %v", err, errSecretTooShort)
+	}
+	if err := hasher.VerifyHash(valid, secret); !errors.Is(err, errSecretTooShort) {
+		t.Errorf("VerifyHash() error = %v, want %v", err, errSecretTooShort)
+	}
+}
+
+func Test_UnitSCrypt_ShortSecretOutsideOnly(t *testing.T) {
+	if fips140.Enforced() {
+		t.Skip("short secrets are rejected in fips140=only mode")
+	}
+	hasher := NewSCrypt()
+	hash, err := hasher.CreateHash("abc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := hasher.VerifyHash(hash, "abc"); err != nil {
+		t.Errorf("VerifyHash() error = %v", err)
 	}
 }
 

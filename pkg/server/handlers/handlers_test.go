@@ -142,7 +142,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "102 valid cert but wrong node name",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:k3s-agent-1",
 									Organization: []string{user.NodesGroup},
@@ -157,7 +157,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "103 valid cert but nonexistent node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "nonexistent")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:nonexistent",
 									Organization: []string{user.NodesGroup},
@@ -172,7 +172,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "104 valid basic legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -186,7 +186,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "105 valid cert legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -204,7 +204,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "106 valid basic legacy key deferred local password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 								withClientAddress(req, control.BindAddressOrLoopback(false, false))
 							},
@@ -219,7 +219,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "107 valid cert legacy key deferred local password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -238,7 +238,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "108 valid basic different node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "k3s-agent-1")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -265,7 +265,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "200 valid basic client key but bad password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								req.SetBasicAuth("node", control.AgentToken)
 							},
@@ -280,7 +280,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "201 valid cert client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
@@ -397,7 +397,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "302 valid cert but wrong node name",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:k3s-agent-1",
 									Organization: []string{user.NodesGroup},
@@ -412,7 +412,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "303 valid cert but nonexistent node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "nonexistent")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:nonexistent",
 									Organization: []string{user.NodesGroup},
@@ -427,7 +427,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "304 valid basic legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -441,7 +441,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "305 valid cert legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -459,7 +459,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "306 valid basic legacy key deferred local password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 								withClientAddress(req, control.BindAddressOrLoopback(false, false))
 							},
@@ -474,7 +474,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "307 valid cert legacy key deferred local password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -493,7 +493,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "308 valid basic different node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "k3s-agent-1")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -520,7 +520,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "400 valid basic client key but bad password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								req.SetBasicAuth("node", control.AgentToken)
 							},
@@ -535,7 +535,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "401 valid cert client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
@@ -648,7 +648,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "502 valid cert but wrong node name",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:k3s-agent-1",
 									Organization: []string{user.NodesGroup},
@@ -663,7 +663,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "503 valid cert but nonexistent node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "nonexistent")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:nonexistent",
 									Organization: []string{user.NodesGroup},
@@ -678,7 +678,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "504 valid basic legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -692,7 +692,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "505 valid cert legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -710,7 +710,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "506 valid basic legacy key deferred local password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 								withClientAddress(req, control.BindAddressOrLoopback(false, false))
 							},
@@ -725,7 +725,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "507 valid cert legacy key deferred local password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -744,7 +744,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "508 valid basic different node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "k3s-agent-1")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -771,7 +771,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "600 valid basic client key but bad password",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								req.SetBasicAuth("node", control.AgentToken)
 							},
@@ -786,7 +786,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "601 valid cert client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
@@ -911,7 +911,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "702 valid cert but wrong node name",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:k3s-agent-1",
 									Organization: []string{user.NodesGroup},
@@ -926,7 +926,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "703 valid cert but nonexistent node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "nonexistent")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:nonexistent",
 									Organization: []string{user.NodesGroup},
@@ -941,7 +941,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "704 valid basic legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -955,7 +955,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "705 valid cert legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -973,7 +973,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "706 valid basic different node",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", "k3s-agent-1")
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -1005,7 +1005,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "800 valid basic client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								req.SetBasicAuth("node", control.AgentToken)
 							},
@@ -1020,7 +1020,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "801 valid cert client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
@@ -1066,7 +1066,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "902 valid basic legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								req.SetBasicAuth("node", control.AgentToken)
 							},
 							match: func(_ *config.Control) types.GomegaMatcher {
@@ -1080,7 +1080,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "903 valid cert legacy key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
 									Organization: []string{user.NodesGroup},
@@ -1103,7 +1103,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "A00 valid basic client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								req.SetBasicAuth("node", control.AgentToken)
 							},
@@ -1118,7 +1118,7 @@ func Test_UnitHandlers(t *testing.T) {
 							name: "A01 valid cert client key",
 							prepare: func(control *config.Control, req *http.Request) {
 								req.Header.Add("k3s-Node-Name", control.ServerNodeName)
-								req.Header.Add("k3s-Node-Password", "password")
+								req.Header.Add("k3s-Node-Password", "long-enough-test-password")
 								withCertificateRequest(req)
 								withNewClientCert(req, control.Runtime.ClientCA, control.Runtime.ClientCAKey, control.Runtime.ClientKubeletKey, certutil.Config{
 									CommonName:   "system:node:" + control.ServerNodeName,
@@ -1623,8 +1623,8 @@ func getCorelessControl(t *testing.T) (*config.Control, context.CancelFunc) {
 	g := NewWithT(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	control := &config.Control{
-		Token:          "token",
-		AgentToken:     "agent-token",
+		Token:          "long-enough-server-token",
+		AgentToken:     "long-enough-agent-token",
 		ServerNodeName: "k3s-server-1",
 	}
 
@@ -1643,7 +1643,7 @@ func getCorelessControl(t *testing.T) (*config.Control, context.CancelFunc) {
 	nodePasswordFile := filepath.Join(nodeConfigPath, "password")
 
 	os.MkdirAll(nodeConfigPath, 0700)
-	os.WriteFile(nodePasswordFile, []byte("password"), 0644)
+	os.WriteFile(nodePasswordFile, []byte("long-enough-test-password"), 0644)
 
 	// add authenticator
 	auth, err := authenticator.FromArgs([]string{
@@ -1665,8 +1665,8 @@ func getCorelessAgentlessControl(t *testing.T) (*config.Control, context.CancelF
 	g := NewWithT(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	control := &config.Control{
-		Token:          "token",
-		AgentToken:     "agent-token",
+		Token:          "long-enough-server-token",
+		AgentToken:     "long-enough-agent-token",
 		ServerNodeName: "k3s-server-1",
 	}
 
@@ -1701,8 +1701,8 @@ func getMockedControl(t *testing.T) (*config.Control, context.CancelFunc) {
 	g := NewWithT(t)
 	ctx, cancel := context.WithCancel(context.Background())
 	control := &config.Control{
-		Token:          "token",
-		AgentToken:     "agent-token",
+		Token:          "long-enough-server-token",
+		AgentToken:     "long-enough-agent-token",
 		ServerNodeName: "k3s-server-1",
 	}
 
