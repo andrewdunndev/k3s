@@ -1,0 +1,69 @@
+name: continuous-integration
+
+on:
+  push:
+    branches:
+    - master
+    - v[1-9].*
+    - prep-v[1-9].*
+    tags:
+    - v[1-9].*
+  pull_request:
+    branches:
+    - master
+    - v[1-9].*
+    - prep-v[1-9].*
+
+permissions:
+  contents: read
+
+env:
+  BUILDTIME_BASE: &buildtime_base "golang:1.26.6-alpine3.24@sha256:af8d6740070b8906d12eae1c3e3ea0957fb63f492051ea05e354c38ef9fe88df"
+  RUNTIME_BASE: &runtime_base "alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b"
+  GO_VERSION: &go_version "~1.26.6"
+
+jobs:
+  # Phase 1: Run all code quality checks (unicode scan, lint, tests, binary build).
+  # All subsequent jobs are gated on this completing successfully.
+  checks:
+    uses: ./.github/workflows/ci-checks.yml
+    with:
+      go-version: *go_version
+      buildtime-base: *buildtime_base
+
+  # Phase 2: Build and push the container image.
+  # Only runs for non-fork PRs and direct pushes — skipped for dependabot and external fork PRs
+  # to prevent secret exposure to untrusted code.
+  # id-token: write — required for keyless cosign signing via Sigstore OIDC
+  # attestations: write — required for pushing SBOM attestations to DockerHub
+  container:
+    needs: checks
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/ci-container.yml
+    with:
+      buildtime-base: *buildtime_base
+      runtime-base: *runtime_base
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  # Phase 3: Publish a versioned release via GoReleaser.
+  # Only runs on tag pushes (v*) after the container build succeeds.
+  # contents: write — required for GoReleaser to create the GitHub release
+  # id-token: write — required for keyless cosign signing via Sigstore OIDC
+  # attestations: write — required for SLSA provenance and SBOM attestation on release binaries
+  # Called workflows cannot self-elevate permissions; all must be granted here in the caller.
+  release:
+    needs: container
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/ci-release.yml
+    with:
+      go-version: *go_version

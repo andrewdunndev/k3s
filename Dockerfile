@@ -51,6 +51,7 @@ ENV TARGETARCH=$TARGETARCH
 # Used by both build and validate stages, better caching if we do this in a separate stage
 COPY ./scripts/ ./scripts
 COPY ./go.mod ./go.sum ./main.go ./
+COPY ./third_party ./third_party
 COPY ./manifests ./manifests
 RUN mkdir -p bin dist
 RUN --mount=type=cache,id=gomod,target=/go/pkg/mod \

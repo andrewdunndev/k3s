@@ -6,7 +6,7 @@ replace (
 	github.com/Microsoft/hcsshim => github.com/Microsoft/hcsshim v0.15.0-rc.1
 	github.com/Mirantis/cri-dockerd => github.com/k3s-io/cri-dockerd v0.3.19-k3s5
 	github.com/cilium/ebpf => github.com/cilium/ebpf v0.12.3
-	github.com/cloudnativelabs/kube-router/v2 => github.com/k3s-io/kube-router/v2 v2.11.1-k3s1
+	github.com/cloudnativelabs/kube-router/v2 => ./third_party/kube-router
 	github.com/containerd/containerd/api => github.com/containerd/containerd/api v1.11.1
 	github.com/containerd/containerd/v2 => github.com/k3s-io/containerd/v2 v2.3.7-k3s1.36
 	github.com/docker/distribution => github.com/docker/distribution v2.8.3+incompatible
@@ -68,6 +68,8 @@ replace (
 	k8s.io/sample-apiserver => github.com/k3s-io/kubernetes/staging/src/k8s.io/sample-apiserver v1.36.6-k3s1
 	k8s.io/streaming => github.com/k3s-io/kubernetes/staging/src/k8s.io/streaming v1.36.6-k3s1
 	sigs.k8s.io/cri-tools => github.com/k3s-io/cri-tools v1.36.0-k3s1
+	github.com/rancher/wrangler/v3 => ./third_party/wrangler
+	github.com/rancher/dynamiclistener => ./third_party/dynamiclistener
 )
 
 require (
