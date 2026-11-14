@@ -33,7 +33,10 @@ func setMode(mode string) {
 		}
 		Expect(server.RunCmdOnNode(cmd)).Error().NotTo(HaveOccurred())
 	}
-	Expect(docker.RestartCluster(append(tc.Servers, tc.Agents...))).To(Succeed())
+	Expect(docker.RestartCluster(tc.Servers)).To(Succeed())
+	for _, agent := range tc.Agents {
+		Expect(agent.RunCmdOnNode("systemctl restart k3s-agent --no-block")).Error().NotTo(HaveOccurred())
+	}
 }
 
 // processGODEBUG reads GODEBUG from the environment of the running k3s process
@@ -111,9 +114,9 @@ var _ = Describe("FIPS Migration Tests", Ordered, func() {
 				Expect(processGODEBUG(server, "k3s")).To(ContainSubstring("fips140=only"))
 			}
 		})
-		It("rejects the agent with the legacy node password", func() {
+		It("rejects the legacy node password on the server", func() {
 			Eventually(func() (string, error) {
-				return tc.Agents[0].RunCmdOnNode("journalctl -u k3s-agent --no-pager | grep -c 'Node password rejected' || true")
+				return tc.Servers[0].RunCmdOnNode("journalctl -u k3s --no-pager | grep -c 'salts shorter than 128 bits is not allowed in FIPS 140-only mode' || true")
 			}, "120s", "5s").ShouldNot(Equal("0\n"))
 			Eventually(func() error {
 				return tests.NodesReady(tc.KubeconfigFile, tc.GetAgentNames())
