@@ -135,10 +135,11 @@ var _ = Describe("FIPS Migration Tests", Ordered, func() {
 				Expect(processGODEBUG(server, "k3s")).To(ContainSubstring("fips140=only"))
 			}
 		})
-		It("rejects the legacy node password on the server", func() {
+		It("rejects the legacy node password with an error that names the remedy", func() {
 			Eventually(func() (string, error) {
-				return tc.Servers[0].RunCmdOnNode("journalctl -u k3s --no-pager | grep -c 'salts shorter than 128 bits is not allowed in FIPS 140-only mode' || true")
+				return tc.Servers[0].RunCmdOnNode("journalctl -u k3s --no-pager | grep -c 'hash salt is 8 bytes, fips140=only requires at least 16; delete the node password secret so the node can re-register' || true")
 			}, "120s", "5s").ShouldNot(Equal("0\n"))
+			Expect(tc.Servers[0].RunCmdOnNode("journalctl -u k3s --no-pager | grep -c 'salts shorter than 128 bits' || true")).To(Equal("0\n"))
 			Eventually(func() error {
 				return nodeReady(tc.GetAgentNames()[0])
 			}, "180s", "5s").ShouldNot(Succeed())
