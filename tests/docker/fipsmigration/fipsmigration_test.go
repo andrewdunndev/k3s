@@ -36,6 +36,11 @@ func setMode(mode string) {
 	Expect(docker.RestartCluster(append(tc.Servers, tc.Agents...))).To(Succeed())
 }
 
+// processGODEBUG reads GODEBUG from the environment of the running k3s process
+func processGODEBUG(node docker.DockerNode) (string, error) {
+	return node.RunCmdOnNode(`tr '\\0' '\\n' < /proc/\$(pgrep -o -x k3s)/environ | grep ^GODEBUG=`)
+}
+
 // legacyHash returns a node password hash as created before the salt was lengthened
 func legacyHash(password string) string {
 	hasher := hash.NewSCrypt().(hash.SCrypt)
@@ -100,6 +105,11 @@ var _ = Describe("FIPS Migration Tests", Ordered, func() {
 			Eventually(func() error {
 				return tests.NodesReady(tc.KubeconfigFile, tc.GetServerNames())
 			}, "120s", "5s").Should(Succeed())
+		})
+		It("runs the server in the requested mode", func() {
+			for _, server := range tc.Servers {
+				Expect(processGODEBUG(server)).To(ContainSubstring("fips140=only"))
+			}
 		})
 		It("rejects the agent with the legacy node password", func() {
 			Eventually(func() (string, error) {
