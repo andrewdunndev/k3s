@@ -1,0 +1,18 @@
+# Allow ingress to the test-clusterip pods only from pods labelled role=allowed.
+# Creating this policy makes kube-router build its ipsets.
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: fips-allow-labelled
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      k8s-app: nginx-app-clusterip
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            role: allowed
+  policyTypes:
+  - Ingress
