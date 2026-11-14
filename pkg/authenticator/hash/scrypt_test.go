@@ -89,11 +89,11 @@ func Test_UnitSCrypt_ShortSecret(t *testing.T) {
 		t.Fatal(err)
 	}
 	secret := strings.Repeat("A", minFIPSSecretLen-1)
-	if _, err := hasher.CreateHash(secret); !errors.Is(err, errSecretTooShort) {
-		t.Errorf("CreateHash() error = %v, want %v", err, errSecretTooShort)
+	if _, err := hasher.CreateHash(secret); !errors.Is(err, ErrSecretTooShort) {
+		t.Errorf("CreateHash() error = %v, want %v", err, ErrSecretTooShort)
 	}
-	if err := hasher.VerifyHash(valid, secret); !errors.Is(err, errSecretTooShort) {
-		t.Errorf("VerifyHash() error = %v, want %v", err, errSecretTooShort)
+	if err := hasher.VerifyHash(valid, secret); !errors.Is(err, ErrSecretTooShort) {
+		t.Errorf("VerifyHash() error = %v, want %v", err, ErrSecretTooShort)
 	}
 }
 

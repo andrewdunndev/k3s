@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	"github.com/k3s-io/k3s/pkg/authenticator/hash"
 	"github.com/k3s-io/k3s/pkg/clientaccess"
 	"github.com/k3s-io/k3s/pkg/cluster"
 	"github.com/k3s-io/k3s/pkg/daemons/config"
@@ -84,6 +86,11 @@ func tokenRotate(ctx context.Context, control *config.Control, newToken string) 
 
 	if newToken, err = util.NormalizeToken(newToken); err != nil {
 		return err
+	}
+
+	// The password file is hashed on every start, so a token that cannot be hashed would stop the server at the next restart
+	if err := hash.CheckSecretLen(newToken); err != nil {
+		return fmt.Errorf("invalid token: %w", err)
 	}
 
 	if err := passwd.EnsureUser("server", version.Program+":server", newToken); err != nil {

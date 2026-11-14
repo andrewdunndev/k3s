@@ -22,11 +22,13 @@ const hashFormat = "$%d:%x:%d:%d:%d:%s"
 // minFIPSSecretLen is the shortest HMAC key, 112 bits, that Go accepts in fips140=only mode.
 const minFIPSSecretLen = 14
 
-var errSecretTooShort = fmt.Errorf("secret is shorter than %d bytes, which fips140=only mode requires", minFIPSSecretLen)
+// ErrSecretTooShort is returned for a secret that fips140=only mode cannot key an HMAC with.
+var ErrSecretTooShort = fmt.Errorf("secret is shorter than %d bytes, which fips140=only mode requires", minFIPSSecretLen)
 
-func checkSecretLen(secretKey string) error {
+// CheckSecretLen returns ErrSecretTooShort if secretKey would be rejected by CreateHash or VerifyHash.
+func CheckSecretLen(secretKey string) error {
 	if fips140.Enforced() && len(secretKey) < minFIPSSecretLen {
-		return errSecretTooShort
+		return ErrSecretTooShort
 	}
 	return nil
 }
@@ -53,7 +55,7 @@ func NewSCrypt() Hasher {
 
 // CreateHash will return a hashed version of the secretKey, or an error
 func (s SCrypt) CreateHash(secretKey string) (string, error) {
-	if err := checkSecretLen(secretKey); err != nil {
+	if err := CheckSecretLen(secretKey); err != nil {
 		return "", err
 	}
 
@@ -77,7 +79,7 @@ func (s SCrypt) CreateHash(secretKey string) (string, error) {
 
 // VerifyHash will compare a secretKey and a hash, and return nil if they match
 func (s SCrypt) VerifyHash(hash, secretKey string) error {
-	if err := checkSecretLen(secretKey); err != nil {
+	if err := CheckSecretLen(secretKey); err != nil {
 		return err
 	}
 
