@@ -378,7 +378,7 @@ func migrateTokens(ctx context.Context, runtime *config.ControlRuntime, bootstra
 			if deferLegacyMigration(runtime) {
 				continue
 			}
-			if err := migrateLegacy(ctx, storageClient, bootstrapKV, token); err != nil {
+			if err := migrateLegacy(ctx, storageClient, &bootstrapKV, token); err != nil {
 				return err
 			}
 		}

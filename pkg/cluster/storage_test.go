@@ -70,7 +70,7 @@ func Test_UnitmigrateTokensMixedVersion(t *testing.T) {
 			setFIPS(t, true, false)
 			setNodes(t, tt.nodes, tt.listErr)
 			s := &updateStore{}
-			list := []*mvccpb.KeyValue{{Key: []byte(storageKey(token)), Value: []byte(legacyVector), ModRevision: 7}}
+			list := []mvccpb.KeyValue{{Key: []byte(storageKey(token)), Value: []byte(legacyVector), ModRevision: 7}}
 			if err := migrateTokens(context.Background(), nil, list, s, storageKey(""), storageKey(token), token, token); err != nil {
 				t.Fatalf("migrateTokens() error = %v", err)
 			}
@@ -114,7 +114,7 @@ func Test_UnitmigrateTokens(t *testing.T) {
 				oldToken = "old-passphrase"
 				value, _ = encrypt(oldToken, []byte("bootstrap payload"), true)
 			}
-			list := []*mvccpb.KeyValue{{Key: []byte(storageKey(oldToken)), Value: value, ModRevision: 7}}
+			list := []mvccpb.KeyValue{{Key: []byte(storageKey(oldToken)), Value: value, ModRevision: 7}}
 			if err := migrateTokens(context.Background(), nil, list, s, storageKey(""), storageKey(token), token, oldToken); err != nil {
 				t.Fatalf("migrateTokens() error = %v", err)
 			}
