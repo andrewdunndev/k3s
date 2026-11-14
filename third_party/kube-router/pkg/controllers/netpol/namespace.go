@@ -1,0 +1,61 @@
+package netpol
+
+import (
+	"reflect"
+
+	api "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/klog/v2"
+)
+
+func (npc *NetworkPolicyControllerBase) newNamespaceEventHandler() cache.ResourceEventHandler {
+	return cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj any) {
+			npc.handleNamespaceAdd(obj.(*api.Namespace))
+		},
+		UpdateFunc: func(oldObj, newObj any) {
+			npc.handleNamespaceUpdate(oldObj.(*api.Namespace), newObj.(*api.Namespace))
+		},
+		DeleteFunc: func(obj any) {
+			switch obj := obj.(type) {
+			case *api.Namespace:
+				npc.handleNamespaceDelete(obj)
+				return
+			case cache.DeletedFinalStateUnknown:
+				if namespace, ok := obj.Obj.(*api.Namespace); ok {
+					npc.handleNamespaceDelete(namespace)
+					return
+				}
+			default:
+				klog.Errorf("unexpected object type: %v", obj)
+			}
+		},
+	}
+}
+
+func (npc *NetworkPolicyControllerBase) handleNamespaceAdd(obj *api.Namespace) {
+	if obj.Labels == nil {
+		return
+	}
+	klog.V(2).Infof("Received update for namespace: %s", obj.Name)
+
+	npc.RequestFullSync()
+}
+
+func (npc *NetworkPolicyControllerBase) handleNamespaceUpdate(oldObj, newObj *api.Namespace) {
+	if reflect.DeepEqual(oldObj.Labels, newObj.Labels) {
+		return
+	}
+	klog.V(2).Infof("Received update for namespace: %s", newObj.Name)
+
+	npc.RequestFullSync()
+}
+
+func (npc *NetworkPolicyControllerBase) handleNamespaceDelete(obj *api.Namespace) {
+	if obj.Labels == nil {
+		return
+	}
+	klog.V(2).Infof("Received namespace: %s delete event", obj.Name)
+
+	npc.RequestFullSync()
+}
