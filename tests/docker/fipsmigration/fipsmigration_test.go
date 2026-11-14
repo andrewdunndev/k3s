@@ -12,6 +12,7 @@ import (
 	"github.com/k3s-io/k3s/tests/docker"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var tc *docker.TestConfig
@@ -37,6 +38,26 @@ func setMode(mode string) {
 	for _, agent := range tc.Agents {
 		Expect(agent.RunCmdOnNode("systemctl restart k3s-agent --no-block")).Error().NotTo(HaveOccurred())
 	}
+}
+
+// nodeReady reports whether the named node has Ready=True, ignoring every other node
+func nodeReady(name string) error {
+	nodes, err := tests.ParseNodes(tc.KubeconfigFile)
+	if err != nil {
+		return err
+	}
+	for _, node := range nodes {
+		if node.Name != name {
+			continue
+		}
+		for _, condition := range node.Status.Conditions {
+			if condition.Type == corev1.NodeReady && condition.Status == corev1.ConditionTrue {
+				return nil
+			}
+		}
+		return fmt.Errorf("node %s is not ready", name)
+	}
+	return fmt.Errorf("node %s not found", name)
 }
 
 // processGODEBUG reads GODEBUG from the environment of the running k3s process
@@ -106,7 +127,7 @@ var _ = Describe("FIPS Migration Tests", Ordered, func() {
 				return tests.CheckDefaultDeployments(tc.KubeconfigFile)
 			}, "180s", "5s").Should(Succeed())
 			Eventually(func() error {
-				return tests.NodesReady(tc.KubeconfigFile, tc.GetServerNames())
+				return nodeReady(tc.GetServerNames()[0])
 			}, "120s", "5s").Should(Succeed())
 		})
 		It("runs the server in the requested mode", func() {
@@ -119,7 +140,7 @@ var _ = Describe("FIPS Migration Tests", Ordered, func() {
 				return tc.Servers[0].RunCmdOnNode("journalctl -u k3s --no-pager | grep -c 'salts shorter than 128 bits is not allowed in FIPS 140-only mode' || true")
 			}, "120s", "5s").ShouldNot(Equal("0\n"))
 			Eventually(func() error {
-				return tests.NodesReady(tc.KubeconfigFile, tc.GetAgentNames())
+				return nodeReady(tc.GetAgentNames()[0])
 			}, "180s", "5s").ShouldNot(Succeed())
 		})
 	})
