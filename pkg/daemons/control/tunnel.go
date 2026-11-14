@@ -3,6 +3,7 @@ package control
 import (
 	"bufio"
 	"context"
+	"crypto/fips140"
 	"errors"
 	"io"
 	"net"
@@ -94,7 +95,8 @@ func (t *TunnelServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodConnect {
 		t.serveConnect(resp, req)
 	} else {
-		t.server.ServeHTTP(resp, req)
+		// the RFC 6455 accept key is SHA-1
+		fips140.WithoutEnforcement(func() { t.server.ServeHTTP(resp, req) })
 	}
 }
 
