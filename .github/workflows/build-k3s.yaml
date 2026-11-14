@@ -21,6 +21,11 @@ on:
         description: 'Whether to build K3s with -cover for test coverage collection'
         required: false
         default: false
+      gofips140:
+        type: string
+        description: 'Value for GOFIPS140 at build time, such as v1.0.0. When set, the artifact is named k3s-<arch>-fips.'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -67,6 +72,9 @@ jobs:
           windows/amd64) artifact_name='k3s-windows' ;;
           *) artifact_name='k3s-all' ;;
         esac
+        if [ -n '${{ inputs.gofips140 }}' ]; then
+          artifact_name="${artifact_name}-fips"
+        fi
         contains_linux=false
         image_allowed=false
         if [[ ",${platforms}," == *,linux/* ]]; then
@@ -96,6 +104,7 @@ jobs:
           COMMIT=${{ steps.git_vars.outputs.commit }}
           DIRTY=${{ steps.git_vars.outputs.dirty }}
           GOCOVER=${{ inputs.test-coverage && '1' || '' }}
+          GOFIPS140=${{ inputs.gofips140 }}
         push: false
         provenance: mode=min
         platforms: ${{ steps.platforms.outputs.platforms }}

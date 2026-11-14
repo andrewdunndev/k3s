@@ -48,6 +48,26 @@ jobs:
         files: ./coverage.out
         flags: unittests # optional
         verbose: true # optional (default = false)
+  test-unit-fips:
+    name: Unit Tests (fips140=${{ matrix.mode }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [on, only]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      with:
+        fetch-depth: 1
+    - name: Install Go
+      uses: ./.github/actions/setup-go
+    - name: Run Unit Tests
+      env:
+        GODEBUG: fips140=${{ matrix.mode }}
+      run: |
+        go test ./pkg/authenticator/hash/ ./pkg/cluster/ -run Unit
   test-unit-windows:
     name: Unit Tests (windows)
     runs-on: windows-2022

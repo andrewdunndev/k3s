@@ -47,6 +47,11 @@ jobs:
     with:
       platforms: linux/arm64
       upload-image: true
+  build-fips:
+    uses: ./.github/workflows/build-k3s.yaml
+    with:
+      upload-image: true
+      gofips140: v1.0.0
   e2e:
     name: "E2E Tests"
     needs: build
@@ -161,18 +166,22 @@ jobs:
           verbose: true # optional (default = false)
   
   docker-go:
-    needs: [build, build-arm64]
+    needs: [build, build-arm64, build-fips]
     name: Docker
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
-        dtest: [autoimport, basics, bootstraptoken, cacerts, dualstack, etcd, gatewayapi, t4, hardened, lazypull, network, nixsnapshotter, skew, secretsencryption, snapshotrestore, svcpoliciesandfirewall, token, upgrade]
+        dtest: [autoimport, basics, bootstraptoken, cacerts, dualstack, etcd, gatewayapi, t4, fips, fipsmigration, hardened, lazypull, network, nixsnapshotter, skew, secretsencryption, snapshotrestore, svcpoliciesandfirewall, token, upgrade]
         arch: [amd64, arm64]
         exclude:
           - dtest: autoimport
             arch: arm64
           - dtest: dualstack
+            arch: arm64
+          - dtest: fips
+            arch: arm64
+          - dtest: fipsmigration
             arch: arm64
           - dtest: nixsnapshotter
             arch: arm64
@@ -212,7 +221,7 @@ jobs:
     - name: "Download K3s image"
       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       with:
-        name: k3s-${{ matrix.arch }}
+        name: k3s-${{ matrix.arch }}${{ startsWith(matrix.dtest, 'fips') && '-fips' || '' }}
         path: ./dist/artifacts
     - name: Set up Docker
       uses: docker/setup-docker-action@0234bb73ccb40f0c430b795634f9247e2b5c2d23 # v5
@@ -246,7 +255,7 @@ jobs:
       run: |
         go install github.com/onsi/ginkgo/v2/ginkgo@$(. ./scripts/version.sh; get-module-version github.com/onsi/ginkgo/v2)
         # These tests use ghcr.io/rancher/systemd-node and have different flags.
-        CI_TESTS="autoimport dualstack hardened secretsencryption svcpoliciesandfirewall token"
+        CI_TESTS="autoimport dualstack fips fipsmigration hardened secretsencryption svcpoliciesandfirewall token"
         if [ ${{ matrix.dtest }} = "upgrade" ] || [ ${{ matrix.dtest }} = "skew" ]; then
           ginkgo run -v -timeout=0 ./tests/docker/${{ matrix.dtest }}/ -- -k3sImage=$K3S_IMAGE -channel=$CHANNEL
         elif [ ${{ matrix.dtest }} = "snapshotrestore" ]; then
