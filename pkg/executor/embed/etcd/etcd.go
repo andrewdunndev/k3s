@@ -2,6 +2,7 @@ package etcd
 
 import (
 	"context"
+	"crypto/fips140"
 	"errors"
 	"os"
 	"path/filepath"
@@ -33,7 +34,9 @@ func StartETCD(ctx context.Context, wg *sync.WaitGroup, args *executor.ETCDConfi
 	}
 
 	wg.Add(1)
-	etcd, err := embed.StartEtcd(cfg)
+	// etcd derives member and cluster IDs with SHA-1; the bypass is inherited by the goroutines StartEtcd spawns
+	var etcd *embed.Etcd
+	fips140.WithoutEnforcement(func() { etcd, err = embed.StartEtcd(cfg) })
 	if err != nil {
 		wg.Done()
 		return err

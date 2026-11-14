@@ -3,6 +3,7 @@ package etcd
 import (
 	"bytes"
 	"context"
+	"crypto/fips140"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -1565,14 +1566,18 @@ func (e *ETCD) Restore(ctx context.Context) error {
 	}
 
 	logrus.Infof("Pre-restore etcd database moved to %s", oldDataDir)
-	return snapshotv3.NewV3(logger).Restore(snapshotv3.RestoreConfig{
-		SnapshotPath:   restorePath,
-		Name:           e.name,
-		OutputDataDir:  dbDir(e.config),
-		OutputWALDir:   walDir(e.config),
-		PeerURLs:       []string{e.peerURL()},
-		InitialCluster: e.name + "=" + e.peerURL(),
+	// etcd derives the member and cluster IDs with SHA-1 during restore
+	fips140.WithoutEnforcement(func() {
+		err = snapshotv3.NewV3(logger).Restore(snapshotv3.RestoreConfig{
+			SnapshotPath:   restorePath,
+			Name:           e.name,
+			OutputDataDir:  dbDir(e.config),
+			OutputWALDir:   walDir(e.config),
+			PeerURLs:       []string{e.peerURL()},
+			InitialCluster: e.name + "=" + e.peerURL(),
+		})
 	})
+	return err
 }
 
 // restorePath returns the path of the snapshot file to restore from.

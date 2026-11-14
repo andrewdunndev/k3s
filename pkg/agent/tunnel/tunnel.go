@@ -2,6 +2,7 @@ package tunnel
 
 import (
 	"context"
+	"crypto/fips140"
 	"crypto/tls"
 	"fmt"
 	"net"
@@ -397,7 +398,11 @@ func (a *agentTunnel) connect(rootCtx context.Context, address string) agentConn
 	go func() {
 		for {
 			// ConnectToProxy blocks until error or context cancellation
-			err := remotedialer.ConnectToProxyWithDialer(ctx, wsURL, nil, auth, ws, a.dialContext, onConnect)
+			var err error
+			// the RFC 6455 accept key is SHA-1
+			fips140.WithoutEnforcement(func() {
+				err = remotedialer.ConnectToProxyWithDialer(ctx, wsURL, nil, auth, ws, a.dialContext, onConnect)
+			})
 			status = loadbalancer.HealthCheckResultFailed
 			if err != nil && !errors.Is(err, context.Canceled) {
 				logrus.WithField("url", wsURL).WithError(err).Error("Remotedialer proxy error; reconnecting...")
