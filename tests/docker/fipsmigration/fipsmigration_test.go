@@ -37,8 +37,8 @@ func setMode(mode string) {
 }
 
 // processGODEBUG reads GODEBUG from the environment of the running k3s process
-func processGODEBUG(node docker.DockerNode) (string, error) {
-	return node.RunCmdOnNode(`tr '\\0' '\\n' < /proc/\$(pgrep -o -x k3s)/environ | grep ^GODEBUG=`)
+func processGODEBUG(node docker.DockerNode, unit string) (string, error) {
+	return node.RunCmdOnNode(`tr '\\0' '\\n' < /proc/\$(systemctl show -p MainPID --value ` + unit + `)/environ | grep ^GODEBUG=`)
 }
 
 // legacyHash returns a node password hash as created before the salt was lengthened
@@ -108,7 +108,7 @@ var _ = Describe("FIPS Migration Tests", Ordered, func() {
 		})
 		It("runs the server in the requested mode", func() {
 			for _, server := range tc.Servers {
-				Expect(processGODEBUG(server)).To(ContainSubstring("fips140=only"))
+				Expect(processGODEBUG(server, "k3s")).To(ContainSubstring("fips140=only"))
 			}
 		})
 		It("rejects the agent with the legacy node password", func() {
